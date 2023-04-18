@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Page</title>
+</head>
+<body>
+       <section id="top">
+        <div>
+            <span style="font-size: large;"><b>Logged in as:</b></span>
+            <span id="login-name" style="font-size: large; font-weight: bold; color: rebeccapurple;"></span>
+        </div>
+        <div>
+            <span style="font-size: large;"><b>Current Group:</b></span>
+            <span id="current-group-name" style="font-size: large; font-weight: bold; color: rebeccapurple;"></span>
+        </div>
+        <div id="logout-btn-div">
+            <button id="logout-btn" onclick="logout()">Logout</button>
+        </div>
+       </section>
+
+       <section id="main">
+        <div class="group-list-container">
+            <form onsubmit="createGroup(event)" class="create-group">
+                <input type="text" id="create-group-input" class="create-group-input" placeholder="Enter Group Name" required>
+                <button type="submit">Create</button>
+            </form>
+            <h2>Group List</h2>
+            <li>
+                <span>NAME</span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </li>
+            <hr>
+            <div id="group-list-wrapper">
+                <div id="group-list" class="group-list"></div><hr>
+                <div id="users-inside-group"></div>
+            </div>
+        </div>
+        <div class="group-chat-container">
+            <h2>Group Chat</h2>
+            <div id="group-chat-receive-box" class="message-container"></div>
+            <form onsubmit="sendGroupMsg(event)" id="group-chat-form" class="send-container">
+                <input type="text" id="group-chat-input" class="message-input" placeholder="Type your message" required>
+                <button type="submit" id="send-btn-group" class="send-btn">Send</button>
+                <button onclick="sendMedia();" type="send-media" id="send-media-group" class="send-media-btn">Upload</button>
+            </form>  
+        </div> 
+       </section>
+
+<ul id="user-list"></ul>
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"></script>
+       <script src="chat.js"></script>     
+</body>
+</html>
