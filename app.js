@@ -3,6 +3,11 @@ const bodyParser = require('body-parser');
 const helmet = require('helmet')
 const morgan = require('morgan')
 
+const http = require('http');
+const app = express();
+const server = http.createServer(app);
+const io = require('socket.io')(server, {cors:{origin:'*'}});
+
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -22,7 +27,7 @@ const Chat = require('./models/chats')
 const Group = require('./models/group');
 const userGroup = require('./models/userGroup');
 
-const app = express();
+// const app = express();
 
 app.use(express.json());
 app.use(cors({
@@ -49,12 +54,14 @@ User.belongsToMany(Group, {through: userGroup});
 Group.hasMany(Chat);
 Chat.belongsTo(Group);
 
-sequelize
-  .sync()
-  .then(result => {
-    // console.log(result);
-    app.listen(process.env.port);
-  })
-  .catch(err => {
-    console.log(err);
-  });
+io.on('connection', socket => {
+    socket.on('send-message', room => {
+        io.emit('receive-message', room);
+    });
+})
+
+const port = process.env.PORT || 3000;
+sequelize.sync();
+server.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});

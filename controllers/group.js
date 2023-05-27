@@ -1,4 +1,4 @@
-const {Op, where}= require('sequelize');
+const {Op}= require('sequelize');
 
 const Group = require('../models/group');
 const User = require('../models/user');

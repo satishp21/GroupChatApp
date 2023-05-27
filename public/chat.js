@@ -1,3 +1,5 @@
+const socket = io('http://localhost:3000')
+
 const token = localStorage.getItem('token');
 const name = localStorage.getItem('name');
 const userId = localStorage.getItem('userId');
@@ -55,35 +57,31 @@ const authAxios = axios.create({
   })
   .catch((err) => console.log(err));
 
-  //get groups
-  //chats
-  
-    //chats
+
+  // the below code will return chats of gruops 1st time clicked on get chat will will get perticular grups messages    later messages are handled by socket.on
+
     let localMsg = JSON.parse(localStorage.getItem("localMsg"));
-    //console.log(typeof(localMsg))
     let lastId;
     if ( localMsg.length == 0) {
       lastId = 0;
     }
-    if (localMsg.length > 0) {
+    else if (localMsg.length > 0 && localMsg.length<10) {
       lastId = localMsg[localMsg.length - 1].id;
+    }
+    else if (localMsg.length > 10){
+      localMsg.shift()
     }
     const groupId = localStorage.getItem("groupId");
   
     if (localStorage.getItem("groupId") != null) {
       console.log('***********', lastId)
-      //  setInterval(() => {
+      //  setInterval(() => { // we can write this inplace of whole socket code which will load messeges at perticulat time interval
       authAxios
         .get(`/get-chats?id=${lastId}&gId=${groupId}`)
         .then((response) => {
-          console.log('*******RESP', response)
         
           let retrivedMsg = localMsg.concat(response.data.chat);
-          console.log('all retrrrrrrrrived msg',retrivedMsg)
-
-          //deleting old messages from local storage
           while (retrivedMsg.length > 10) {
-            for (let i = 0; i < retrivedMsg.length - 10; i++)
               retrivedMsg.shift();
           }
           localStorage.setItem("localMsg", JSON.stringify(retrivedMsg));
@@ -98,6 +96,45 @@ const authAxios = axios.create({
       // }, 4000)
     }
 
+  socket.on('receive-message', (message) => {
+
+    let localMsg = JSON.parse(localStorage.getItem("localMsg"));
+    let lastId;
+    if ( localMsg.length == 0) {
+      lastId = 0;
+    }
+    else if (localMsg.length > 0 && localMsg.length<10) {
+      lastId = localMsg[localMsg.length - 1].id;
+    }
+    else if (localMsg.length > 10){
+      localMsg.shift()
+    }
+    const groupId = localStorage.getItem("groupId");
+  
+    if (localStorage.getItem("groupId") != null) {
+      authAxios
+        .get(`/get-chats?id=${lastId}&gId=${groupId}`)
+        .then((response) => {
+          console.log('*******RESP', response)
+        
+          let retrivedMsg = localMsg.concat(response.data.chat);
+          console.log('all retrrrrrrrrived msg',retrivedMsg)
+
+          //deleting old messages from local storage
+          while (retrivedMsg.length > 10) {
+              retrivedMsg.shift();
+          }
+          localStorage.setItem("localMsg", JSON.stringify(retrivedMsg));
+
+          const div = document.getElementById("group-chat-receive-box");
+          div.innerHTML = ""
+          retrivedMsg.forEach((chat) => {
+            div.innerHTML += `<div id="${chat.id}>"><span style="color:green;"><b>${chat.name}:</b></span><span>${chat.message}</span></div>`;
+          });
+        })
+        .catch((err) => console.log(err.response));
+    }
+  });
 
     function sendGroupMsg(event,imageurl) {
       event.preventDefault();
@@ -113,13 +150,20 @@ const authAxios = axios.create({
           groupId: localStorage.getItem("groupId"),
         };
         console.log(obj);
+        
         authAxios
           .post("/post-chat", obj)
           .then((res) => console.log(res))
           .catch((err) => console.log(err));
-        document.getElementById("group-chat-input").value = "";
-        document.getElementById("group-chat-receive-box").innerHTML += `
-                  <div><span style="color:green;"><b>${name}:</b></span><span>${obj.message}</span></div>`;
+
+          socket.emit('send-message', obj);
+          document.getElementById('group-chat-input').value = '';
+          document.getElementById('group-chat-receive-box').innerHTML += `
+            <div><span style="color:green;"><b>${name}:</b></span><span>${obj.message}</span></div>`;
+
+        // document.getElementById("group-chat-input").value = "";
+        // document.getElementById("group-chat-receive-box").innerHTML += `
+        //           <div><span style="color:green;"><b>${name}:</b></span><span>${obj.message}</span></div>`;
       }
     }
   

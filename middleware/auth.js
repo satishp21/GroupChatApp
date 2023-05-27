@@ -11,7 +11,6 @@ const authenticate = async (req,res,next) => {
 
         const getUser = await User.findByPk(user.userId)
         req.user = getUser;
-
         next();
     } catch (error) {
         console.log('Something went wrong', error)

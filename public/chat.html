@@ -5,9 +5,140 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f1f1f1;
+        }
+
+        #top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        #logout-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #main {
+            display: flex;
+        }
+
+        .group-list-container {
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .group-list-container h2 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .group-list-container form {
+            margin-bottom: 10px;
+        }
+
+        .group-list-container input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .group-list-container button[type="submit"] {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .group-list-container li {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .group-list-container span {
+            flex: 1;
+        }
+
+        .group-chat-container {
+            flex: 2;
+        }
+
+        .group-chat-container h2 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .message-container {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+
+        .send-container {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .send-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .send-media-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #user-list {
+            margin-top: 20px;
+            padding: 0;
+            list-style-type: none;
+        }
+
+        #user-list li {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
-       <section id="top">
+    <section id="top">
         <div>
             <span style="font-size: large;"><b>Logged in as:</b></span>
             <span id="login-name" style="font-size: large; font-weight: bold; color: rebeccapurple;"></span>
@@ -19,9 +150,9 @@
         <div id="logout-btn-div">
             <button id="logout-btn" onclick="logout()">Logout</button>
         </div>
-       </section>
+    </section>
 
-       <section id="main">
+    <section id="main">
         <div class="group-list-container">
             <form onsubmit="createGroup(event)" class="create-group">
                 <input type="text" id="create-group-input" class="create-group-input" placeholder="Enter Group Name" required>
@@ -36,7 +167,8 @@
             </li>
             <hr>
             <div id="group-list-wrapper">
-                <div id="group-list" class="group-list"></div><hr>
+                <div id="group-list" class="group-list"></div>
+                <hr>
                 <div id="users-inside-group"></div>
             </div>
         </div>
@@ -49,10 +181,12 @@
                 <button onclick="sendMedia();" type="send-media" id="send-media-group" class="send-media-btn">Upload</button>
             </form>  
         </div> 
-       </section>
+    </section>
 
-<ul id="user-list"></ul>
-       <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"></script>
-       <script src="chat.js"></script>     
+    <ul id="user-list"></ul>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js"></script> -->
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"></script>
+    <script src="chat.js"></script>
 </body>
 </html>
