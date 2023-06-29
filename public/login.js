@@ -8,9 +8,6 @@ async function login(event) {
         email,
         password
     }
-
-    email.value = '';
-    password.value = '';
     
     console.log(obj.email);
 
@@ -24,6 +21,16 @@ async function login(event) {
 
         if(res.status === 201){
             window.location.href = './chat.html'
+        }
+
+        if(res.status === 203){
+            // document.body.innerHTML = 'user doesnt exist please signup first'
+            alert('user doesnt exist please signup first')
+        }
+
+        if(res.status === 207){
+            // document.body.innerHTML = 'user doesnt exist please signup first'
+            alert('please enter correct password')
         }
         
     } catch (error) {

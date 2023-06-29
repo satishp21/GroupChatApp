@@ -3,11 +3,11 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 exports.signunp = async (req, res, next) => {
+    try {
     const {name, email, phone, password} = req.body;
     if (!name || !email || !phone || !password) {
-     return res.status(403).json({sucess:false, message:'user already exists'})
+     return res.status(403).json({sucess:false, message:'please enter all the required field'})
     }
-    try {
      const user = await User.findAll({where:{email}});
  
      if(user.length > 0) {
@@ -29,14 +29,14 @@ exports.signunp = async (req, res, next) => {
     try {
         const {email, password} = req.body;
 
-    const user = await User.findAll({where:{email}});
-
-    if (user.length > 0) {
-        bcrypt.compare(password, user[0].password, (err, match)=> {
+        const user = await User.findOne({where:{email}});
+        
+    if (user) {
+        bcrypt.compare(password, user.password, (err, match)=> {
             if (!match) {
                 return res.status(207).json({success: false, message:'user is unauthorized'});
             }
-            return res.status(201).json({success: true, message:'user logged in successfully', userId:user[0].id, name:user[0].name, token:generateToken(user[0].id)});
+            return res.status(201).json({success: true, message:'user logged in successfully', userId:user.id, name:user.name, token:generateToken(user.id)});
         })
     }else {
         return res.status(203).json({success:false, message:'invalid email'});

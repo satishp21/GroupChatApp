@@ -7,208 +7,164 @@ const userId = localStorage.getItem('userId');
 const authAxios = axios.create({
     baseURL: "http://localhost:3000",
     headers: { Authorization: token },
-  });
+});
 
   //top-display 
 
-  document.getElementById("login-name").innerHTML = `${name}`;
-  const currentGroup = document.getElementById("current-group-name");
-  if(localStorage.getItem("groupName") != null) {
-    currentGroup.innerHTML = `${localStorage.getItem("groupName")}`
-  } else {
-    currentGroup.innerHTML = "Select a Group";
+document.getElementById("login-name").innerHTML = `${name}`;
+const currentGroup = document.getElementById("current-group-name");
+if(localStorage.getItem("groupName") != null) {
+  currentGroup.innerHTML = `${localStorage.getItem("groupName")}`
+} else {
+  currentGroup.innerHTML = "Select a Group";
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href="./login.html";
+}
+  
+async function createGroup(event) {
+  //event.preventDefault();
+  try {
+    const name = document.getElementById("create-group-input").value;
+    const res = await authAxios.post('/create-group', {name, isAdmin:true});
+    const groupId = res.data.group.id;
+    localStorage.setItem('groupId', groupId);
+  
+  }catch (err) {
+      console.log(err);
   }
+}
 
-  function logout() {
-    localStorage.clear();
-    window.location.href="./login.html";
-  }
-  
-    async function createGroup(event) {
-      //event.preventDefault();
-      try {
-          const name = document.getElementById("create-group-input").value;
-          const res = await authAxios.post('/create-group', {name, isAdmin:true});
-          console.log('>>GrouP ID', res);
-          const groupId = res.data.group.id;
-          localStorage.setItem('groupId', groupId);
-  
-      }catch (err) {
-          console.log(err);
-      }
-    }
-
-  authAxios
-  .get("/get-groups")
-  .then((res) => {
-    //getting groups
-    const groupListDiv = document.getElementById("group-list");
-    groupListDiv.innerHTML = "";
-    res.data.groups.forEach((group) => {
-      groupListDiv.innerHTML += `
-          <li id="${group.id}" style="padding:5px 0;">
-          <span>${group.name}</span>
-          <button id="show-users">Show Users</button>
-          <button id="change-group-btn" class="group-btn">Enter Chat</button>
-          <button id="delete-group-btn" class="group-btn">Delete Group</button>
-          </li>
-          `;
-    });
-  })
-  .catch((err) => console.log(err));
-
-
-  // the below code will return chats of gruops 1st time clicked on get chat will will get perticular grups messages    later messages are handled by socket.on
-
-    let localMsg = JSON.parse(localStorage.getItem("localMsg"));
-    let lastId;
-    if ( localMsg.length == 0) {
-      lastId = 0;
-    }
-    else if (localMsg.length > 0 && localMsg.length<10) {
-      lastId = localMsg[localMsg.length - 1].id;
-    }
-    else if (localMsg.length > 10){
-      localMsg.shift()
-    }
-    const groupId = localStorage.getItem("groupId");
-  
-    if (localStorage.getItem("groupId") != null) {
-      console.log('***********', lastId)
-      //  setInterval(() => { // we can write this inplace of whole socket code which will load messeges at perticulat time interval
-      authAxios
-        .get(`/get-chats?id=${lastId}&gId=${groupId}`)
-        .then((response) => {
-        
-          let retrivedMsg = localMsg.concat(response.data.chat);
-          while (retrivedMsg.length > 10) {
-              retrivedMsg.shift();
-          }
-          localStorage.setItem("localMsg", JSON.stringify(retrivedMsg));
-  
-          const div = document.getElementById("group-chat-receive-box");
-          div.innerHTML = ""
-          retrivedMsg.forEach((chat) => {
-            div.innerHTML += `<div id="${chat.id}>"><span style="color:green;"><b>${chat.name}:</b></span><span>${chat.message}</span></div>`;
-          });
-        })
-        .catch((err) => console.log(err.response));
-      // }, 4000)
-    }
-
-  socket.on('receive-message', (message) => {
-
-    let localMsg = JSON.parse(localStorage.getItem("localMsg"));
-    let lastId;
-    if ( localMsg.length == 0) {
-      lastId = 0;
-    }
-    else if (localMsg.length > 0 && localMsg.length<10) {
-      lastId = localMsg[localMsg.length - 1].id;
-    }
-    else if (localMsg.length > 10){
-      localMsg.shift()
-    }
-    const groupId = localStorage.getItem("groupId");
-  
-    if (localStorage.getItem("groupId") != null) {
-      authAxios
-        .get(`/get-chats?id=${lastId}&gId=${groupId}`)
-        .then((response) => {
-          console.log('*******RESP', response)
-        
-          let retrivedMsg = localMsg.concat(response.data.chat);
-          console.log('all retrrrrrrrrived msg',retrivedMsg)
-
-          //deleting old messages from local storage
-          while (retrivedMsg.length > 10) {
-              retrivedMsg.shift();
-          }
-          localStorage.setItem("localMsg", JSON.stringify(retrivedMsg));
-
-          const div = document.getElementById("group-chat-receive-box");
-          div.innerHTML = ""
-          retrivedMsg.forEach((chat) => {
-            div.innerHTML += `<div id="${chat.id}>"><span style="color:green;"><b>${chat.name}:</b></span><span>${chat.message}</span></div>`;
-          });
-        })
-        .catch((err) => console.log(err.response));
-    }
+authAxios
+.get("/get-groups")
+.then((res) => {
+  //getting groups
+  const groupListDiv = document.getElementById("group-list");
+  groupListDiv.innerHTML = "";
+  res.data.groups.forEach((group) => {
+    groupListDiv.innerHTML += `
+        <li id="${group.id}" style="padding:5px 0;">
+        <span>${group.name}</span>
+        <button id="show-users">Show Users</button>
+        <button id="change-group-btn" class="group-btn">Enter Chat</button>
+        <button id="delete-group-btn" class="group-btn">Delete Group</button>
+        </li>
+        `;
   });
+})
+.catch((err) => console.log(err));
 
-    function sendGroupMsg(event,imageurl) {
-      event.preventDefault();
+// the below code will return chats of gruops 1st time clicked on get chat will will get perticular groups messages later messages are handled by socket.on
+
+let localMsg = JSON.parse(localStorage.getItem("localMsg"));
+let lastId;
+if ( localMsg.length == 0) {
+  lastId = 0;
+}
+else if (localMsg.length > 0 && localMsg.length<10) {
+  lastId = localMsg[localMsg.length - 1].id;
+}
+else if (localMsg.length > 10){
+  localMsg.shift()
+}
+const groupId = localStorage.getItem("groupId");
   
-      if (localStorage.getItem("groupId") == null) {
-        alert("Select a group first");
-        document.getElementById("group-chat-input").value = "";
-      } else {
-        const input = document.getElementById("group-chat-input").value;
-        const obj = {
-          message: input || imageurl,
-          name: name,
-          groupId: localStorage.getItem("groupId"),
-        };
-        console.log(obj);
+if (localStorage.getItem("groupId") != null) {
+  console.log('***********', lastId)
+  //setInterval(() => { // we can write this inplace of whole socket code which will load messeges at perticulat time interval or we can use sockets which is be more optimised
+  authAxios
+    .get(`/get-chats?id=${lastId}&gId=${groupId}`)
+    .then((response) => {
         
-        authAxios
-          .post("/post-chat", obj)
-          .then((res) => console.log(res))
-          .catch((err) => console.log(err));
-
-          socket.emit('send-message', obj);
-          document.getElementById('group-chat-input').value = '';
-          document.getElementById('group-chat-receive-box').innerHTML += `
-            <div><span style="color:green;"><b>${name}:</b></span><span>${obj.message}</span></div>`;
-
-        // document.getElementById("group-chat-input").value = "";
-        // document.getElementById("group-chat-receive-box").innerHTML += `
-        //           <div><span style="color:green;"><b>${name}:</b></span><span>${obj.message}</span></div>`;
+      let retrivedMsg = localMsg.concat(response.data.chat);
+      while (retrivedMsg.length > 10) {
+        retrivedMsg.shift();
       }
-    }
+      localStorage.setItem("localMsg", JSON.stringify(retrivedMsg));
   
-    document
-    .getElementById("group-list-wrapper")
-    .addEventListener("click", (e) => {      //for changing/deleting group
+      const div = document.getElementById("group-chat-receive-box");
+      div.innerHTML = ""
+      retrivedMsg.forEach((chat) => {
+        div.innerHTML += `<div id="${chat.id}>"><span style="color:green;"><b>${chat.name}:</b></span><span>${chat.message}</span></div>`;
+      });
+    })
+    .catch((err) => console.log(err.response));
+  // }, 4000)
+}
 
-      if (e.target.id === "change-group-btn") {
-        const gId= e.target.parentNode.id;
-        const gName= e.target.parentNode.children[0].innerText;
-        console.log(gId,gName)
-        localStorage.setItem("groupId", gId);
-        localStorage.setItem("groupName", gName);
-        localStorage.setItem("localMsg", "[]");
-        window.location.reload();
-      }
+socket.on('receive', (message) => {
+  const div = document.getElementById("group-chat-receive-box");
+  div.innerHTML += `<div id="${message}>"><span style="color:green;"><b>${message.name}:</b></span><span>${message.message}</span></div>`;
+});
 
-      if (e.target.id === "delete-group-btn") {
-        const gId= e.target.parentNode.id;
-        console.log(gId)
-        if (confirm("Are you sure?")) {
-          authAxios
-            .delete(`/delete-group/${gId}`)
-            .then((res) => {
-              console.log(res.data);
-              localStorage.removeItem("groupId");
-              alert(`Group with id-${gId} is deleted successfully`);
-              window.location.reload();
-            })
-            .catch((err) => 
-              alert("you are not admin"))
-              // console.log(err.response.data,"this is not admin error"));
-        }
-      }
+function sendGroupMsg(event,imageurl) {
+  event.preventDefault();
+  
+  if (localStorage.getItem("groupId") == null) {
+    alert("Select a group first");
+    document.getElementById("group-chat-input").value = "";
+  } else {
+    const input = document.getElementById("group-chat-input").value;
+    const obj = {
+      message: input || imageurl,
+      name: name,
+      groupId: localStorage.getItem("groupId"),
+    };
+        
+    authAxios
+      .post("/post-chat", obj)
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
 
-      if (e.target.id === "show-users") {
-        const gId= e.target.parentNode.id;
-        authAxios
-          .get(`/get-users/?gId=${gId}`)
-          .then((res) => {
-            // console.log(res.data);
-            document.getElementById("users-inside-group").innerHTML = "";
-            console.log(res,"res")
-            res.data.userData.forEach((user) => {
-              document.getElementById("users-inside-group").innerHTML += `
+      socket.emit('send', obj);
+      document.getElementById('group-chat-input').value = ''; //after clickink seng i/p msg will be empty
+  }
+}
+  
+document
+.getElementById("group-list-wrapper")
+.addEventListener("click", (e) => {      //for changing/deleting group
+
+  if (e.target.id === "change-group-btn") {
+    const gId= e.target.parentNode.id;
+    const gName= e.target.parentNode.children[0].innerText;
+    console.log(gId,gName)
+    localStorage.setItem("groupId", gId);
+    localStorage.setItem("groupName", gName);
+    localStorage.setItem("localMsg", "[]");
+    window.location.reload();
+  }
+
+  if (e.target.id === "delete-group-btn") {
+    const gId= e.target.parentNode.id;
+    console.log(gId)
+    if (confirm("Are you sure?")) {
+      authAxios
+        .delete(`/delete-group/${gId}`)
+        .then((res) => {
+          console.log(res.data);
+          localStorage.removeItem("groupId");
+          alert(`Group with id-${gId} is deleted successfully`);
+          window.location.reload();
+        })
+        .catch((err) => 
+          alert("you are not admin"))
+          // console.log(err.response.data,"this is not admin error"));
+    }
+  }
+
+  if (e.target.id === "show-users") {
+    const gId= e.target.parentNode.id;
+    authAxios
+      .get(`/get-users/?gId=${gId}`)
+      .then((res) => {
+        // console.log(res.data);
+        document.getElementById("users-inside-group").innerHTML = "";
+        console.log(res,"res")
+        res.data.userData.forEach((user) => {
+          document.getElementById("users-inside-group").innerHTML += `
                         <li id="${user.groups[0].id}">
                             <span>${user.name}</span>
                             <span>${user.email}</span>
@@ -301,8 +257,6 @@ const authAxios = axios.create({
     authAxios
     .get("/get-users")
     .then((res) => {
-      // getting users
-      // console.log(res.data);
       const userListDiv = document.getElementById("user-list");
       userListDiv.innerHTML = "";
       res.data.user.forEach((user) => {
@@ -321,9 +275,7 @@ const authAxios = axios.create({
     function sendMedia() {
       axios.post('http://localhost:3000/upload')
       .then(res => {
-        console.log(res,"this is upload res")
         sendGroupMsg(event,res.data.fileURL)
-        
       })
       .catch((err) => {
         console.log(err);

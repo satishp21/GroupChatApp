@@ -32,7 +32,7 @@ const userGroup = require('./models/userGroup');
 app.use(express.json());
 app.use(cors({
     origin:'*', // any origin is allowed to access resources.
-    credentials:true  //allows the server to include cookies and authorization headers in the cross-origin request
+    // credentials:true  //allows the server to include cookies and authorization headers in the cross-origin request
 }));
 
 app.use(helmet()); //helmet() is a middleware function that helps secure the Express.js application by setting various HTTP headers that can mitigate common security vulnerabilities, such as Cross-Site Scripting (XSS) and Clickjacking.
@@ -55,8 +55,11 @@ Group.hasMany(Chat);
 Chat.belongsTo(Group);
 
 io.on('connection', socket => {
-    socket.on('send-message', room => {
-        io.emit('receive-message', room);
+    console.log(">>>>>>socket is active for connecting")
+    socket.on('send', message => {
+        console.log(">>>>>>send is triggererred",message)
+        // socket.broadcast.emit('receive', message);
+        io.emit('receive', message);
     });
 })
 
